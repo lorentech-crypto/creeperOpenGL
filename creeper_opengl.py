@@ -45,41 +45,71 @@ mouse_btn   = None
 
 # PRIMITIVA: cubo unitario centrado en el origen con color uniforme
 
-def color_cube(color):
-    """Dibuja un cubo unitario (lado 1) centrado en el origen con el color dado."""
-    r, g, b = color
-    glColor3f(r, g, b)
+def color_cube(colorv):
+    """
+    Función que dibuja un cubo centrado en el origen y de lado 1
+    con todas las caras del color pasado por parámetro a la función.
+    El color se pasa en una lista de tres componentes.
+    """
+    he = 0.5   # semilado del cubo (half-edge)
 
-    # Cada cara = 2 triángulos (quad)
-    faces = [
-        # normal,  4 vértices
-        ([0,  0,  1], [(-0.5,-0.5, 0.5),( 0.5,-0.5, 0.5),( 0.5, 0.5, 0.5),(-0.5, 0.5, 0.5)]),  # front
-        ([0,  0, -1], [( 0.5,-0.5,-0.5),(-0.5,-0.5,-0.5),(-0.5, 0.5,-0.5),( 0.5, 0.5,-0.5)]),  # back
-        ([0,  1,  0], [(-0.5, 0.5,-0.5),( 0.5, 0.5,-0.5),( 0.5, 0.5, 0.5),(-0.5, 0.5, 0.5)]),  # top
-        ([0, -1,  0], [(-0.5,-0.5, 0.5),( 0.5,-0.5, 0.5),( 0.5,-0.5,-0.5),(-0.5,-0.5,-0.5)]),  # bottom
-        ([1,  0,  0], [( 0.5,-0.5, 0.5),( 0.5,-0.5,-0.5),( 0.5, 0.5,-0.5),( 0.5, 0.5, 0.5)]),  # right
-        ([-1, 0,  0], [(-0.5,-0.5,-0.5),(-0.5,-0.5, 0.5),(-0.5, 0.5, 0.5),(-0.5, 0.5,-0.5)]),  # left
-    ]
+    v1 = [-he, -he,  he]
+    v2 = [-he,  he,  he]
+    v3 = [ he, -he,  he]
+    v4 = [ he,  he,  he]
+    v5 = [ he, -he, -he]
+    v6 = [ he,  he, -he]
+    v7 = [-he,  he, -he]
+    v8 = [-he, -he, -he]
 
-    glBegin(GL_QUADS)
-    for normal, verts in faces:
-        glNormal3fv(normal)
-        for v in verts:
-            glVertex3fv(v)
+    glColor3fv(colorv)
+
+    # CARA POSTERIOR
+    glBegin(GL_POLYGON)
+    glVertex3fv(v8)
+    glVertex3fv(v7)
+    glVertex3fv(v6)
+    glVertex3fv(v5)
     glEnd()
 
-    # Aristas en negro para destacar cuadrícula
-    glColor3f(0.0, 0.0, 0.0)
-    glBegin(GL_LINE_LOOP)
-    for v in [(-0.5,-0.5, 0.5),( 0.5,-0.5, 0.5),( 0.5, 0.5, 0.5),(-0.5, 0.5, 0.5)]: glVertex3fv(v)
+    # CARA FRONTAL
+    glBegin(GL_POLYGON)
+    glVertex3fv(v1)
+    glVertex3fv(v3)
+    glVertex3fv(v4)
+    glVertex3fv(v2)
     glEnd()
-    glBegin(GL_LINE_LOOP)
-    for v in [( 0.5,-0.5,-0.5),(-0.5,-0.5,-0.5),(-0.5, 0.5,-0.5),( 0.5, 0.5,-0.5)]: glVertex3fv(v)
+
+    # CARA DERECHA
+    glBegin(GL_POLYGON)
+    glVertex3fv(v3)
+    glVertex3fv(v5)
+    glVertex3fv(v6)
+    glVertex3fv(v4)
     glEnd()
-    glBegin(GL_LINES)
-    for a, b in [((-0.5,-0.5, 0.5),(-0.5,-0.5,-0.5)),(( 0.5,-0.5, 0.5),( 0.5,-0.5,-0.5)),
-                 (( 0.5, 0.5, 0.5),( 0.5, 0.5,-0.5)),((-0.5, 0.5, 0.5),(-0.5, 0.5,-0.5))]:
-        glVertex3fv(a); glVertex3fv(b)
+
+    # CARA IZQUIERDA
+    glBegin(GL_POLYGON)
+    glVertex3fv(v1)
+    glVertex3fv(v2)
+    glVertex3fv(v7)
+    glVertex3fv(v8)
+    glEnd()
+
+    # CARA INFERIOR
+    glBegin(GL_POLYGON)
+    glVertex3fv(v1)
+    glVertex3fv(v3)
+    glVertex3fv(v5)
+    glVertex3fv(v8)
+    glEnd()
+
+    # CARA SUPERIOR
+    glBegin(GL_POLYGON)
+    glVertex3fv(v2)
+    glVertex3fv(v4)
+    glVertex3fv(v6)
+    glVertex3fv(v7)
     glEnd()
 
 def draw_orthohedron(cx, cy, cz, W, D, H, color, hollow=True):
