@@ -1,13 +1,10 @@
 """
-Actividad 1 – Dibujo de objetos 3D, visualización y proyección
-Creeper de Minecraft con OpenGL y GLUT
-
+Actividad 1 – Dibujo de objetos 3D, visualización y proyección Creeper de Minecraft con OpenGL y GLUT
 Dimensiones (en cubos unitarios):
   Pies   : 8 x 4 x 6  c/u, separados 2 cubos entre sí
   Cuerpo : 8 x 4 x 12 (solapa 1 cubo con cada pie)
   Cabeza : 8 x 8 x 8  (centrada con el cuerpo)
   Cara   : elementos negros superpuestos en cara frontal
-
 Ventana: 4 viewports
   Superior-Izq  : Proyección paralela ortográfica  – Vista frontal
   Superior-Der  : Proyección paralela ortográfica  – Vista lateral izquierda
@@ -15,9 +12,9 @@ Ventana: 4 viewports
   Inferior-Der  : Proyección paralela oblicua gabinete – Vista isométrica
 """
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Dependencias
-# ─────────────────────────────────────────────────────────────────────────────
+
 try:
     from OpenGL.GL   import *
     from OpenGL.GLU  import *
@@ -28,26 +25,26 @@ except ImportError:
 import math
 import sys
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Colores (tonos verde/negro del Creeper)
-# ─────────────────────────────────────────────────────────────────────────────
+
 GREEN_LIGHT  = (0.18, 0.70, 0.18)   # verde claro cuerpo
 GREEN_DARK   = (0.08, 0.42, 0.08)   # verde oscuro detalle
 BLACK_FACE   = (0.05, 0.05, 0.05)   # negro cara
 GREEN_MID    = (0.12, 0.55, 0.12)   # verde medio pies/cuerpo
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # Estado de la cámara orbital (viewport perspectiva)
-# ─────────────────────────────────────────────────────────────────────────────
+
 cam_angle_x = 20.0
 cam_angle_y = -40.0
 cam_zoom    = 40.0
 last_x = last_y = 0
 mouse_btn   = None
 
-# ─────────────────────────────────────────────────────────────────────────────
+
 # PRIMITIVA: cubo unitario centrado en el origen con color uniforme
-# ─────────────────────────────────────────────────────────────────────────────
+
 def color_cube(color):
     """Dibuja un cubo unitario (lado 1) centrado en el origen con el color dado."""
     r, g, b = color
@@ -85,14 +82,6 @@ def color_cube(color):
         glVertex3fv(a); glVertex3fv(b)
     glEnd()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# FUNCIÓN AUXILIAR: rellena un bloque ortoédrico con cubos unitarios
-#   cx, cy, cz  = coordenadas del centro del bloque
-#   W, D, H     = dimensiones en cubos (ancho X, fondo Z, alto Y)
-#   color       = tupla RGB
-#   hollow      = True → sólo capa exterior (ahorro de geometría)
-# ─────────────────────────────────────────────────────────────────────────────
 def draw_orthohedron(cx, cy, cz, W, D, H, color, hollow=True):
     """Dibuja un bloque W×D×H de cubos unitarios centrado en (cx,cy,cz)."""
     ox = cx - W / 2.0 + 0.5   # offset al primer cubo
@@ -114,15 +103,8 @@ def draw_orthohedron(cx, cy, cz, W, D, H, color, hollow=True):
                 glPopMatrix()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # ELEMENTOS DE LA CARA (sobre cara frontal Z+ de la cabeza)
-# La cabeza ocupa Z en [-4, 4]; cara frontal en Z = +4
-# Cara centrada en X=0, Y en parte superior de la cabeza
-#
-# Interpretación del sprite del creeper:
-#   Ojos  : 2 bloques negros 2×2, separados
-#   Boca  : T invertida negra  (simplificada con bloques)
-# ─────────────────────────────────────────────────────────────────────────────
+
 def draw_face(head_cx, head_cy, head_cz, head_H):
     """Dibuja los elementos negros de la cara sobre la cara frontal de la cabeza."""
     # Z frontal de la cabeza = head_cz + head_D/2   (head_D=8 → +4)
@@ -167,26 +149,13 @@ def draw_face(head_cx, head_cy, head_cz, head_H):
         color_cube(BLACK_FACE)
         glPopMatrix()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
 # CREEPER COMPLETO
-# Sistema de coordenadas:
-#   Y sube (altura), X derecha, Z hacia la cámara
-#   Base del creeper (fondo de los pies) en Y = 0
-#
-# Alturas acumuladas (con solapamiento de 1 cubo cuerpo↔pie):
-#   Pies  : Y  0 →  6      centro_y_pie  = 3
-#   Cuerpo: Y  5 → 17      (empieza en y=5, solapa 1)  centro_y_cuerpo = 11
-#   Cabeza: Y 17 → 25      (encima del cuerpo)          centro_y_cabeza = 21
-# ─────────────────────────────────────────────────────────────────────────────
+
 def draw_creeper():
     """Dibuja el creeper completo en el origen."""
 
     # ── PIES ────────────────────────────────────────────────────────────────
-    # Cada pie: 8 ancho × 4 fondo × 6 alto
-    # Separados 2 cubos entre sí → pie izq centrado en X=-5, pie der en X=+5
-    # (8 cubos cada uno + 2 de separación = 18 cubos totales; simetría: -9 a +9)
-    # Pie izquierdo: Xcenter = -5,  pie derecho: Xcenter = +5
+  
     pie_cy = 3.0    # 6/2
     pie_cz = 0.0    # centrado en Z  (fondo=4 → -2 a +2)
 
@@ -194,14 +163,12 @@ def draw_creeper():
     draw_orthohedron(+5, pie_cy, pie_cz, 8, 4, 6, GREEN_DARK, hollow=True)
 
     # ── CUERPO ──────────────────────────────────────────────────────────────
-    # 8 ancho × 4 fondo × 12 alto
-    # Solapa 1 cubo con cada pie → base cuerpo en Y=5  → centro_y = 5 + 12/2 = 11
+
     cuerpo_cy = 11.0
     draw_orthohedron(0, cuerpo_cy, pie_cz, 8, 4, 12, GREEN_LIGHT, hollow=True)
 
     # ── CABEZA ──────────────────────────────────────────────────────────────
-    # 8 ancho × 8 fondo × 8 alto, centrada con el cuerpo (X=0)
-    # Base cabeza encima del cuerpo: Y = 5 + 12 = 17 → centro_y = 17 + 4 = 21
+    
     cabeza_cy = 21.0
     cabeza_cz = 0.0   # fondo=8 → -4 a +4
     draw_orthohedron(0, cabeza_cy, cabeza_cz, 8, 8, 8, GREEN_LIGHT, hollow=True)
@@ -210,9 +177,8 @@ def draw_creeper():
     draw_face(0, cabeza_cy, cabeza_cz, 8)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN DE LUZ
-# ─────────────────────────────────────────────────────────────────────────────
+
 def setup_lighting():
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
@@ -225,9 +191,8 @@ def setup_lighting():
     glShadeModel(GL_SMOOTH)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # PROYECCIONES
-# ─────────────────────────────────────────────────────────────────────────────
+
 def set_ortho_projection(W, H, extent=30):
     """Proyección ortográfica paralela."""
     ratio = W / H if H > 0 else 1
@@ -272,13 +237,10 @@ def set_oblique_cabinet_projection(W, H, extent=30):
     glMultMatrixf(shear)
     glMatrixMode(GL_MODELVIEW)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
 # DIBUJO DE CADA VIEWPORT
-# ─────────────────────────────────────────────────────────────────────────────
+
 WIN_W = 1000
 WIN_H = 800
-
 
 def draw_viewport(x, y, w, h, title,
                   proj_fn,
@@ -410,9 +372,8 @@ def display():
     glutSwapBuffers()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # INTERACCIÓN RATÓN (sólo para el viewport de perspectiva, VP3)
-# ─────────────────────────────────────────────────────────────────────────────
+
 def mouse_button(button, state, x, y):
     global last_x, last_y, mouse_btn
     last_x, last_y = x, y
@@ -439,28 +400,21 @@ def mouse_motion(x, y):
 
     glutPostRedisplay()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
 # TECLADO
-# ─────────────────────────────────────────────────────────────────────────────
+
 def keyboard(key, x, y):
     if key == b'\x1b' or key == b'q':   # ESC o 'q' para salir
         sys.exit(0)
     glutPostRedisplay()
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# RESHAPE
-# ─────────────────────────────────────────────────────────────────────────────
 def reshape(w, h):
     global WIN_W, WIN_H
     WIN_W, WIN_H = w, h
     glutPostRedisplay()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # MAIN
-# ─────────────────────────────────────────────────────────────────────────────
+
 def main():
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
